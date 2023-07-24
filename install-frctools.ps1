@@ -86,23 +86,8 @@ foreach ($extension in $extensions) {
     C:\Users\Public\wpilib\$year\vscode\bin\code.cmd --install-extension $extension
 }
 
-$vscode_settings = @"
-{
-    "terminal.integrated.defaultProfile.windows": "Git Bash",
-    "vsicons.dontShowNewVersionMessage": true,
-    "emptyIndent.removeIndent": false,
-    "emptyIndent.highlightIndent": true,
-    "git.autofetch": true,
-    "redhat.telemetry.enabled": false,
-    "files.autoSave": "afterDelay",
-    "diffEditor.wordWrap": "off",
-    "git.enableSmartCommit": true,
-    "editor.inlineSuggest.enabled": true,
-    "workbench.iconTheme": "vscode-icons",
-    "editor.formatOnSave": true,
-    "editor.renderWhitespace": "all",
-}"@
+$vscode_settings = '{"terminal.integrated.defaultProfile.windows": "Git Bash","vsicons.dontShowNewVersionMessage": true,"emptyIndent.removeIndent": false,"emptyIndent.highlightIndent": true,"git.autofetch": true,"redhat.telemetry.enabled": false,"files.autoSave": "afterDelay","diffEditor.wordWrap": "off","git.enableSmartCommit": true,"editor.inlineSuggest.enabled": true,"workbench.iconTheme": "vscode-icons","editor.formatOnSave": true,"editor.renderWhitespace": "all",}'
 
-# set vscode settings
-$vscode_settings | Out-File -FilePath "$env:USERPROFILE\AppData\Roaming\Code\User\settings.json" -Encoding ascii
+# set vscode settings by overwriting settings.json
+$vscode_settings | Out-File -FilePath "C:\Users\$env:USERNAME\AppData\Roaming\Code\User\settings.json" -Encoding ascii
 
