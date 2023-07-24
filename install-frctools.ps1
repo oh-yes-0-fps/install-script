@@ -28,7 +28,8 @@ $packages = @(
     "ni-frcgametools",
     "revrobotics-hardwareclient",
     "frc-radioconfigurationutility",
-    "etcher"
+    "etcher",
+    "firefox"
 )
 
 # make a function to check if package name is in choco list
