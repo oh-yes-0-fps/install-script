@@ -17,7 +17,7 @@ if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
     choco upgrade chocolatey -y
 }
 
-# intall the following with chocolatey (if not already installed):
+# intall/update the following with chocolatey:
 $packages = @(
     "git",
     "python",
@@ -29,7 +29,8 @@ $packages = @(
     "revrobotics-hardwareclient",
     "frc-radioconfigurationutility",
     "etcher",
-    "firefox"
+    "firefox",
+    "autodesk-fusion360"
 )
 
 # make a function to check if package name is in choco list
@@ -48,7 +49,6 @@ function choco-list {
 
 foreach ($package in $packages) {
     # check if package is already installed
-    # use choco list --local-only --exact to list exact package names
     if (choco-list($package)) {
         # Write-Host "$package is already installed, Updating..."
         choco upgrade $package -y
