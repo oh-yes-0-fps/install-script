@@ -57,8 +57,51 @@ foreach ($package in $packages) {
     choco install $package -y
 }
 
-# install vscode extensions
+#enable wsl
+Write-Host "Enabling WSL..."
+dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
 
+#enable virtual machine platform
+Write-Host "Enabling Virtual Machine Platform..."
+dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+
+#install wsl2 kernel
+Write-Host "Installing WSL2 Kernel..."
+Invoke-WebRequest -Uri https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi -OutFile wsl_update_x64.msi
+Start-Process -FilePath wsl_update_x64.msi -ArgumentList "/quiet", "/norestart" -Wait
+Remove-Item wsl_update_x64.msi
+
+#set wsl2 as default
+Write-Host "Setting WSL2 as default..."
+wsl --set-default-version 2
+
+#install rust
+# Write-Host "Installing Rust..."
+# Invoke-WebRequest -Uri https://win.rustup.rs/x86_64 -OutFile rustup-init.exe
+# Start-Process -FilePath rustup-init.exe -ArgumentList "/quiet", "/norestart", "-y" -Wait
+# Remove-Item rustup-init.exe
+
+$win_packages = @(
+    "9NVV4PWDW27Z", #Tuner X
+    "9NBLGGH4RSD8", #Arduino IDE
+    "9NQBKB5DW909", #PathPlanner
+    "9P9TQF7MRM4R", #WSL
+    "9PDXGNCFSCZV"  #Ubuntu
+)
+
+foreach ($package in $win_packages) {
+    winget install --disable-interactivity --accept-package-agreements --silent $package --source msstore
+}
+
+
+
+# add vscode to path
+if (-not (Get-Command code -ErrorAction SilentlyContinue)) {
+    $year = (Get-Date).Year
+    $env:Path += ";C:\Users\Public\wpilib\$year\vscode\bin"
+}
+
+# install vscode extensions
 $extensions = @(
     "ms-python.python",
     "1YiB.rust-bundle",
@@ -79,15 +122,20 @@ $extensions = @(
     "DmitryDorofeev.empty-indent"
 )
 
-$year = (Get-Date).Year
-
 foreach ($extension in $extensions) {
     # Write-Host "Installing $extension..."
-    C:\Users\Public\wpilib\$year\vscode\bin\code.cmd --install-extension $extension
+    code --install-extension $extension
 }
 
-$vscode_settings = '{"terminal.integrated.defaultProfile.windows": "Git Bash","vsicons.dontShowNewVersionMessage": true,"emptyIndent.removeIndent": false,"emptyIndent.highlightIndent": true,"git.autofetch": true,"redhat.telemetry.enabled": false,"files.autoSave": "afterDelay","diffEditor.wordWrap": "off","git.enableSmartCommit": true,"editor.inlineSuggest.enabled": true,"workbench.iconTheme": "vscode-icons","editor.formatOnSave": true,"editor.renderWhitespace": "all",}'
-
 # set vscode settings by overwriting settings.json
-$vscode_settings | Out-File -FilePath "C:\Users\$env:USERNAME\AppData\Roaming\Code\User\settings.json" -Encoding ascii
+# was having issues with multi line strings so I just did it this way
+$vscode_settings = '{"terminal.integrated.defaultProfile.windows": "Git Bash","vsicons.dontShowNewVersionMessage": true,"emptyIndent.removeIndent": false,"emptyIndent.highlightIndent": true,"git.autofetch": true,"redhat.telemetry.enabled": false,"files.autoSave": "afterDelay","diffEditor.wordWrap": "off","git.enableSmartCommit": true,"editor.inlineSuggest.enabled": true,"workbench.iconTheme": "vscode-icons","editor.formatOnSave": true,"editor.renderWhitespace": "all",}'
+# delete vscode settings file if it exists
+if (Test-Path "C:\Users\$env:USERNAME\AppData\Roaming\Code\User\settings.json") {
+    Remove-Item "C:\Users\$env:USERNAME\AppData\Roaming\Code\User\settings.json"
+}
+# create vscode settings file
+New-Item -Path "C:\Users\$env:USERNAME\AppData\Roaming\Code\User\settings.json" -ItemType File
+# write vscode settings to file
+Set-Content -Path "C:\Users\$env:USERNAME\AppData\Roaming\Code\User\settings.json" -Value $vscode_settings -Encoding ascii
 
