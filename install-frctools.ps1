@@ -5,6 +5,19 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     Exit 1
 }
 
+if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+    # https://raw.githubusercontent.com/asheroto/winget-installer/master/winget-install.ps1
+    Write-Host "Installing winget..."
+    #store it in documents
+    $winget_installer = "$env:USERPROFILE\Documents\winget-install.ps1"
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/asheroto/winget-installer/master/winget-install.ps1 -OutFile $winget_installer
+    #run it
+    Start-Process -FilePath powershell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$winget_installer`"" -Wait
+    #delete it
+    Remove-Item $winget_installer
+}
+
+
 # install chocolatey
 if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
     Write-Host "Installing Chocolatey..."
@@ -17,15 +30,18 @@ if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
     choco upgrade chocolatey -y
 }
 
+# refresh env variables
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine")
+
 # intall/update the following with chocolatey:
 $packages = @(
+    "wpilib",
+    "ni-frcgametools",
     "git",
     "python",
-    "wpilib",
     "7zip",
     "adobereader",
     "meld",
-    "ni-frcgametools",
     "revrobotics-hardwareclient",
     "frc-radioconfigurationutility",
     "etcher",
