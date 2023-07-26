@@ -8,7 +8,7 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 # install chocolatey
 if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
     Write-Host "Installing Chocolatey..."
-    Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+    Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 
     # add chocolatey to path
     $env:Path += ";C:\ProgramData\chocolatey\bin"
@@ -30,7 +30,9 @@ $packages = @(
     "frc-radioconfigurationutility",
     "etcher",
     "firefox",
-    "autodesk-fusion360"
+    "autodesk-fusion360",
+    "github-desktop",
+    "winscp"
 )
 
 # make a function to check if package name is in choco list
