@@ -114,19 +114,34 @@ foreach ($package in $win_packages) {
     winget install --disable-interactivity --accept-package-agreements --silent $package --source msstore
 }
 
+#check if wpilib did not install
+if (-not (Test-Path "C:\Users\Public\wpilib")) {
+    Write-Warning "WPILib did not install correctly, please run the installer again."
+    Exit 1
+}
 
+$year = (Get-Date).Year
 
 # add vscode to path
 if (-not (Get-Command code -ErrorAction SilentlyContinue)) {
-    $year = (Get-Date).Year
     $env:Path += ";C:\Users\Public\wpilib\$year\vscode\bin"
 }
+
+# JAVA_HOME is not wpilib set it
+#check if "wpilib" is in JAVA_HOME
+if ($env:JAVA_HOME -notmatch "wpilib") {
+    $env:JAVA_HOME = "C:\Users\Public\wpilib\$year\jdk"
+    #add bin to path
+    $env:Path += ";C:\Users\Public\wpilib\$year\jdk\bin"
+}
+
+
 
 # install vscode extensions
 $extensions = @(
     "ms-python.python",
     "1YiB.rust-bundle",
-    "bungcip.better-toml",
+    "tamasfe.even-better-toml",
     "usernamehw.errorlens",
     "mhutchie.git-graph",
     "oderwat.indent-rainbow",
@@ -150,7 +165,25 @@ foreach ($extension in $extensions) {
 
 # set vscode settings by overwriting settings.json
 # was having issues with multi line strings so I just did it this way
-$vscode_settings = '{"terminal.integrated.defaultProfile.windows": "Git Bash","vsicons.dontShowNewVersionMessage": true,"emptyIndent.removeIndent": false,"emptyIndent.highlightIndent": true,"git.autofetch": true,"redhat.telemetry.enabled": false,"files.autoSave": "afterDelay","diffEditor.wordWrap": "off","git.enableSmartCommit": true,"editor.inlineSuggest.enabled": true,"workbench.iconTheme": "vscode-icons","editor.formatOnSave": true,"editor.renderWhitespace": "all",}'
+$vscode_settings = @"
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "vsicons.dontShowNewVersionMessage": true,
+    "emptyIndent.removeIndent": false,
+    "emptyIndent.highlightIndent": true,
+    "git.autofetch": true,
+    "redhat.telemetry.enabled": false,
+    "files.autoSave": "afterDelay",
+    "diffEditor.wordWrap": "off",
+    "git.enableSmartCommit": true,
+    "editor.inlineSuggest.enabled": true,
+    "workbench.iconTheme": "vscode-icons",
+    "editor.formatOnSave": true,
+    "editor.renderWhitespace": "all"
+"@
+
+#add curly braces to settings
+$vscode_settings = "{" + $vscode_settings + "}"
+
 # delete vscode settings file if it exists
 if (Test-Path "C:\Users\$env:USERNAME\AppData\Roaming\Code\User\settings.json") {
     Remove-Item "C:\Users\$env:USERNAME\AppData\Roaming\Code\User\settings.json"
