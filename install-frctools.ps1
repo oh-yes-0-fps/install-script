@@ -135,8 +135,6 @@ if ($env:JAVA_HOME -notmatch "wpilib") {
     $env:Path += ";C:\Users\Public\wpilib\$year\jdk\bin"
 }
 
-
-
 # install vscode extensions
 $extensions = @(
     "ms-python.python",
